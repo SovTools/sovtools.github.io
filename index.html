@@ -1,9 +1,404 @@
 <html>
+  <head>
+    <script src="https://unpkg.com/anchor-link@next"></script>
+    <script src="https://unpkg.com/anchor-link-browser-transport@next"></script>
 
-<body>
+<link rel="stylesheet" type="text/css" href="style.css" media="all" />
 
-<div style='color:#00aa00;'>SOV-Tools</div>
-...
+    <script>
+      const transport = new AnchorLinkBrowserTransport()
+      const link = new AnchorLink({
+        chains: [{
+          chainId: 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906',
+          nodeUrl: 'https://eos.greymass.com'
+        }],
+        transport
+      })
 
-</body>
+
+     
+      
+      
+       const ipfsgateway = "https://gateway.pinata.cloud/ipfs";
+      
+       // login
+       const identifier = 'ineedsovnfts'
+       
+       let session
+
+        // tries to restore session, called when document is loaded
+        function restoreSession() {
+            link.restoreSession(identifier).then((result) => {
+                session = result
+                if (session) {
+                    didLogin()
+                }
+            })
+        }
+
+        // login and store session if sucessful
+        function login() {
+            link.login(identifier).then((result) => {
+              console.log('-1-');
+                console.log(result);
+                console.log('-2-');
+                
+                identity = result;
+                
+                 const identityProofTransaction = identity.serializedTransaction;
+      const identityProofSignature = identity.signatures[0];
+      const identityProofSignedWith = identity.signerKey;
+    
+   
+      
+      
+      
+                session = result.session;
+                didLogin();
+                
+             
+                
+            })
+        }
+
+        // logout and remove session from storage
+        function logout() {
+            document.body.classList.remove('logged-in');
+            session.remove();
+            
+
+             document.getElementById('login_div').style.visibility = 'visible';
+             document.getElementById('login_div').style.height = '';
+             
+             document.getElementById('logout_div').style.visibility = 'hidden';
+             document.getElementById('logout_div').style.height = '0px';
+             
+              document.getElementById('account-name').textContent = ""
+          
+        }
+
+        // called when session was restored or created
+        function didLogin() {
+            document.getElementById('account-name').textContent = session.auth.actor;
+            document.body.classList.add('logged-in');
+            
+             document.getElementById('login_div').style.visibility = 'hidden';
+             document.getElementById('login_div').style.height = '0px';
+
+             document.getElementById('logout_div').style.visibility = 'visible';
+             document.getElementById('logout_div').style.height = '';
+                      
+        }
+
+        // transfer tokens using a session
+        function transfer() {
+        
+          
+            
+      
+            the_tokencontract =  document.getElementById('the_tokencontract').value;
+            the_token =  document.getElementById('the_token').value;
+            the_precision =  document.getElementById('the_precision').value;
+            the_quant =  document.getElementById('the_quant').value;
+            
+            memo = "gimme;"+the_tokencontract+";"+the_token+";"+the_precision+";"+session.auth.actor ;
+
+            
+            quantity = the_quant + " " + "SOV";
+        
+            const action = {
+                account: 'sovmintofeos',
+                name: 'xtransfer',
+                authorization: [session.auth],
+                data: {
+                    from: session.auth.actor,
+                    to: 'burnsovforit',
+                    quantity: quantity,
+                    memo: memo
+                }
+            }
+            session.transact({action}).then((result) => {
+                document.getElementById('log').innerHTML += `Transaction broadcast! ${ result.processed.id }\n`
+            })
+        }
+        
+        
+        
+var cnt2 = 0;        
+ 
+ 
+ 
+
+
+function readurl(url, jsonparam) 
+{
+
+ try {
+var xhr = new XMLHttpRequest(); 
+var fd = new FormData(); 
+xhr.open('POST', url, false); 
+
+ 
+var data2 = jsonparam ;
+  
+xhr.send(data2); 
+
+
+ 
+
+var response = xhr.responseText; 
+
+return(response);
+      } catch (e)
+         {
+         console.log("Connection failed, grabbing local");
+         return '[]';
+         }
+} 
+ 
+ 
+  
+ 
+async function get_balance_sov()
+{
+
+  
+    const rows = await link.client.v1.chain.get_table_rows({
+          code: 'sovmintofeos',
+          scope: session.auth.actor,
+          table: 'accounts',
+        })
+      
+      
+       document.getElementById('account-balance-sov').innerHTML =  rows.rows[0].balance;
+         
+ 
+  
+  
+}
+ 
+ 
+function buynft( data_id, sovprice) 
+{
+
+
+          
+            memo = ""+data_id  ;
+//            alert("memo:" + memo);
+            
+            quantity = sovprice + ".0000 " + "SOV";
+        
+            const action = {
+                account: 'sovmintofeos',
+                name: 'transfer',
+                authorization: [session.auth],
+                data: {
+                    from: session.auth.actor,
+                    to: 'ineedsovnfts',
+                    quantity: quantity,
+                    memo: memo
+                }
+            }
+            session.transact({action}).then((result) => {
+            if ( document.getElementById('log') )
+               {
+                document.getElementById('log').innerHTML += `Transaction broadcast! ${ result.processed.id }\n`
+                }
+            })
+            
+
+} // buynft
+
+
+
+async function get_nftcontent()
+{
+
+ 
+    const rows = await link.client.v1.chain.get_table_rows({
+          code: 'ineedsovnfts',
+          scope: 'ineedsovnfts',
+          table: 'drops',
+        })
+        
+        
+      //  console.log(rows);
+      
+      content = "";
+      
+      var size = rows.rows.length;
+      
+      for (var i=0; i<size; i++)
+          {
+          var data_id  = rows.rows[i].id;
+          var asset_id = rows.rows[i].asset_id;
+          var sender   = rows.rows[i].sender;
+          var sovprice = rows.rows[i].sovprice;
+          
+          
+          var url = "https://eos.api.atomicassets.io/atomicassets/v1/assets/"+asset_id;
+          
+          
+          var jsonparam = JSON.stringify( {assetid: asset_id } ); 
+          var mediajson = readurl(url, jsonparam); 
+       
+         console.log("xxxx");
+         console.log(mediajson);
+             
+           var json_array = JSON.parse(mediajson);                                 
+     
+
+   
+  
+           var hash_img        = json_array['data']['template']['immutable_data']['img'];
+           var collection_name = json_array['data']['collection']['collection_name'] ;
+      
+        
+          
+      
+         content += "<div class='nftarea' style=''>"; 
+
+           var imgbuffer = "<img src='https://gateway.pinata.cloud/ipfs/"+hash_img+"/' style='width:50%;margin-top:10px;'>";
+          
+            content +=   imgbuffer + "<br>";
+
+           content += "<div style='border:1px solid #ffffff' class='round'>" + collection_name + "</div>";
+
+           content += "Asset #"+ asset_id + "<br>offered by "+  sender  + "<br><br>";
+          
+           buttoncontent = "<div class='buy_button' style='' onclick='buynft("+data_id+","+sovprice+")'> Buy for "+sovprice+" SOV</div><br>";
+          
+           content += buttoncontent;
+          content += "</div>";          
+          } // for i...
+      
+      document.getElementById("nftcontent").innerHTML = content;
+}  /// function get_nftcontent()
+
+
+
+function bsfi_thread()
+ {
+if ( document.getElementById('account-balance-sov') )
+   {
+  get_balance_sov();
+   }
+ 
+ if ( document.getElementById('nftcontent') )
+   {
+  get_nftcontent();
+   }
+ 
+      
+
+ 
+ var t = setTimeout("bsfi_thread()", 6000);
+} //// eosiomantis_thread
+
+
+
+    
+        
+ 
+    </script>
+    
+     <style>
+        .logged-in #login-ui {
+            display: none;
+        }
+        #app-ui {
+            display: none;
+        }
+        .logged-in #app-ui {
+            display: block;
+        }
+    </style>
+  </head>
+  <body>
+  
+  
+  <div style='text-align:center;'>
+
+<div style=' background-color:#000;margin-left:auto;margin-right:auto;width:80%;min-height:150%;  -webkit-box-shadow: 0px 0px 15px 0px rgba(50,50,50,0.75);-moz-box-shadow 0px 0px 15px 0px rgba(50,50,50,0.75);box-shadow: 0px 0px 15px 0px rgba(50,50,50,0.75);'>
+<div style=' background-color:#000;margin-left:auto;margin-right:auto;width:95%;min-height:150%;  -webkit-box-shadow: 0px 0px 15px 0px rgba(50,50,50,0.75);-moz-box-shadow 0px 0px 15px 0px rgba(50,50,50,0.75);box-shadow: 0px 0px 15px 0px rgba(50,50,50,0.75);'>
+<div style=' background-color:#000;margin-left:auto;margin-right:auto;width:95%;min-height:150%;  -webkit-box-shadow: 0px 0px 15px 0px rgba(50,50,50,0.75);-moz-box-shadow 0px 0px 15px 0px rgba(50,50,50,0.75);box-shadow: 0px 0px 15px 0px rgba(50,50,50,0.75);'>
+
+
+<div style='text-align:left;margin-left:10px;'>
+<a href='https://www.soveos.one/' style='color:#888888'>soveos.one</a><br>
+</div>
+
+<img src='logo.png' style='width:20%'><br>
+
+
+<div style='text-align:justify;margin:10px;'>
+  <span style='color:#ffffff;font-weight:bold'>Get NFT's by burning SOV!</span><br>
+  
+ For creating your own NFT-sale just send your NFT to the <a href='https://bloks.io/account/ineedsovnfts' style='color:#aaaaff;' target='_blank'>ineedsovnfts</a> - contract with
+ the price in SOV in the memo. E.g. for a price of 100 SOV just put "100" in the memo. For canceling a sale, you may use the
+ <em>cancelsale</em>-action of the contract on blocks.io.<br>
+ If you buy an NFT 50% of the SOV will be send to the seller, 50% of the SOV will be burned. 
+
+  </div>
+
+        <b id="account-name">&nbsp;</b><br>
+        
+        
+     
+
+
+        
+  <div id='logindiv'>
+
+        <div id='login_div' onclick="login()" class='login_button_anchor'>
+        <img src='anchor.png' class='login_button_anchor_image'>        
+        </div>
+
+        <div id='logout_div' onclick="logout()" class='login_button_anchor' style='visibility:hidden;height:0px;'>
+        <img src='anchor_logout.png' class='login_button_anchor_image'>        
+        </div>
+        
+  </div>
+  
+    <br>
+    
+ <div id="login-ui">
+
+    </div>
+    
+
+    <div style='border-bottom:1px solid #222222;'></div>
+    
+    Balance: <span id='account-balance-sov'>...</span>    
+    <br>
+  
+    
+
+   
+   
+ <div style='border-bottom:1px solid #222222;'></div>
+ 
+ 
+       <div id='nftcontent' style=''>xxxx</div>
+ 
+ 
+  <div style='border-bottom:1px solid #222222;'></div>
+   
+
+
+     
+
+</div>
+</div>
+</div>
+</div>
+
+
+
+
+<script>
+bsfi_thread();  
+restoreSession();
+</script>
+  </body>
 </html>
