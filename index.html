@@ -210,6 +210,40 @@ function buynft( data_id, sovprice)
 } // buynft
 
 
+// cancelsale
+function cancelsale( data_id) 
+{
+
+
+          
+          //  memo = ""+data_id  ;
+         //  alert("cancel memo:" + memo);
+            
+         //   return;
+            
+          //  quantity = sovprice + ".0000 " + "SOV";
+        
+            const action = {
+                account: 'ineedsovnfts',
+                name: 'cancelsale',
+                authorization: [session.auth],
+                data: {
+                    sender: session.auth.actor,                    
+                    dropid: data_id
+                    
+                }
+            }
+            session.transact({action}).then((result) => {
+            if ( document.getElementById('log') )
+               {
+                document.getElementById('log').innerHTML += `Transaction broadcast! ${ result.processed.id }\n`
+                }
+            })
+            
+
+} // cancelsale
+
+
 
 async function get_nftcontent()
 {
@@ -289,11 +323,19 @@ async function get_nftcontent()
 
            content += "<div style='border:1px solid #ffffff' class='round'>" + collection_name + "</div>";
 
-           content += "Asset #"+ asset_id + "<br>offered by "+  sender  + "<br><br>";
+           asset_link = "<a href='https://eos.atomichub.io/explorer/asset/" + asset_id + "' style='color:#eeeeee;' target='_blank'>#"+asset_id+ "</a>";
+           content += "Asset "+ asset_link + "<br>offered by "+  sender  + "<br><br>";
           
-           buttoncontent = "<div class='buy_button' style='' onclick='buynft("+data_id+","+sovprice+")'> Buy for "+sovprice+" SOV</div><br>";
-          
+           buttoncontent = "<div class='buy_button' style='' onclick='buynft("+data_id+","+sovprice+")'> Buy for "+sovprice+" SOV</div><br>";          
            content += buttoncontent;
+
+        if (session)
+        if (sender == session.auth.actor)
+           {
+           buttoncontent = "<div class='cancel_button' style='cursor:pointer;text-decoration:underline;' onclick='cancelsale(" +data_id+ ")'>Cancel sale " +data_id+ "</div><br>";          
+           content += buttoncontent;
+           }
+           
           content += "</div>";          
           } // for i...
       
@@ -360,7 +402,7 @@ function bsfi_thread2()
 <div style=' background-color:#000;margin-left:auto;margin-right:auto;width:95%;min-height:150%;  -webkit-box-shadow: 0px 0px 15px 0px rgba(50,50,50,0.75);-moz-box-shadow 0px 0px 15px 0px rgba(50,50,50,0.75);box-shadow: 0px 0px 15px 0px rgba(50,50,50,0.75);'>
 
 
-<div style='float:right;text-align:right;font-size:10px;color:#555555;margin-top:0px;  padding:0px;'>version 0.0.2</div> 
+<div style='float:right;text-align:right;font-size:10px;color:#555555;margin-top:0px;  padding:0px;'>version 0.0.3</div> 
 
 
 <div style='text-align:left;margin-left:10px;'>
@@ -375,8 +417,7 @@ function bsfi_thread2()
   <span style='color:#ffffff;font-weight:bold'>Get NFT's by burning SOV!</span><br>
   
  For creating your own NFT-sale just send your NFT to the <a href='https://bloks.io/account/ineedsovnfts' style='color:#aaaaff;' target='_blank'>ineedsovnfts</a> - contract with
- the price in SOV in the memo. E.g. for a price of 100 SOV just put "100" in the memo. For canceling a sale, you may use the
- <em>cancelsale</em>-action of the contract on blocks.io.<br>
+ the price in SOV in the memo. E.g. for a price of 100 SOV just put "100" in the memo.<br> 
  If you buy an NFT 50% of the SOV will be send to the seller, 50% of the SOV will be burned. 
 
   </div>
