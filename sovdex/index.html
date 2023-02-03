@@ -72,8 +72,22 @@
         </div>        
         
    	    <script>
+   	    
+   	    
+       function func_success_pu(message)
+                    {
+                    console.log("Success!!!");                     
+                    }
+                    
+       function func_error_pu(message)
+                    {
+                    console.log(message);
+                     
+                    }         
+                    
 		function powerup()
 		{
+	  
 		eosforpower = document.getElementById("eosforpower").value;
  
         var theactions = [];
@@ -105,24 +119,14 @@
  
         theactions.push(action);
     
-        if (1)
-           {
-           transact( func_success_pu, func_error, theactions );
-           }
+         
+        transact( func_success_pu, func_error_pu, theactions );
+           
    
    
        } // powerup
 
-       function func_success_pu(message)
-                    {
-                    console.log("Success!!!");                     
-                    }
-                    
-       function func_error(message)
-                    {
-                    console.log(message);
-                     
-                    }                    
+           
        </script>
        <!-- powerup FIN -->
         
