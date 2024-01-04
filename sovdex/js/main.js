@@ -681,60 +681,20 @@ function do_btc_cpu_transaction_bundle() {
 
                     // DoInit BEGIN ------------------------
                     function doinit() {
-                        /*
-                        svxmintofeos    
-                        svxmintofeos - open
-                        letsjustdoit active
-                        owner: letsjustdoit
-                        ram_payer: letsjustdoit  sovdexrelays
-                        symbol: 4,SVX
 
-                        cleos -u https://jungle2.cryptolions.io:443  push action svxmintofeos open '{"owner":"garygarygary","symbol":"4,SVX","ram_payer":"garygarygary"}' -p garygarygary@active
+                        var myaction = [{            
+                            account: 'svxmintofeos',
+                            name: 'open2',
+                            authorization: [{
+                                    actor: global_account,
+                                    permission: global_account_permission}],
+                            data: {
+                                    "user": global_account,
+                                  }
+                        }];
 
-                        */
-                        //alert("do init")
-
-                        //   var sov_receive_account = "themintofeos";
-                        var sov_receive_account = "svxmintofeos";
-
-                        eosobject.transaction({
-                            actions: [{
-                                account: "svxmintofeos",
-                                name: "open2",
-                                authorization: [{
-                                    actor: scatter_account,
-                                    permission: "active"
-                                }],
-                               
-                                data: {
-                                    "user": scatter_account,
-                                }
-                            }]
-                        }).then(result => {
-                            // If Success
-
-                            console.log("Success!!!");
-
-                            alert('Success');
-
-                            return;
-                        }).catch(error => {
-                            console.log(eosobject);
-                            console.log("---ERROR: ");
-                            console.log(error);
-                            // Error details
-
-                            err = JSON.parse(error);
-                            console.log("Error Transaction " + err);
-
-                            alert('-----Error:' + err.error.details[0].message);
-
-                            //nalert('<br><div class=\'checkmark_red\'></div>Error' + err.error.name +'<br><br>','white');  
-                            return;
-
-                        });
-
-                    }
+                        transact(handler_success, handler_error, myaction);
+                    };
                     // DoInit END ------------------------
 
                     function timeConverter(UNIX_timestamp) {
